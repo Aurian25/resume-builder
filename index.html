@@ -1,25 +1,575 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resume Builder</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resume Builder | Resume Forge</title>
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- html2pdf for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <style>
+    :root { --paper-w: 210mm; --paper-h: 297mm; }
+    html, body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    /* A4 preview sizing */
+    #paperWrapper { width: 100%; max-width: 900px; }
+    #resumePaper { width: var(--paper-w); min-height: var(--paper-h); background: white; }
+    @media screen {
+      #resumePaper { transform-origin: top left; }
+    }
+    @media print {
+      body { background: white; }
+      #builder { display: none; }
+      #resumePaper { box-shadow: none; margin: 0; }
+    }
+    /* Simple content styles inside templates */
+    .section-title { letter-spacing: 0.02em; }
+    .dot { width: .5rem; height: .5rem; border-radius: 9999px; display: inline-block; }
+  </style>
 </head>
-<body>
-  <h1>Resume Builder</h1>
-  <form id="resume-form">
-    <label>Name: <input type="text" id="name"></label><br>
-    <label>Email: <input type="email" id="email"></label><br>
-    <label>Skills: <textarea id="skills"></textarea></label><br>
-    <button type="button" onclick="generateResume()">Generate Resume</button>
-  </form>
+<body class="bg-slate-50 text-slate-800">
+  <!-- Nav -->
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-2xl bg-indigo-600"></div>
+        <span class="font-extrabold tracking-tight text-xl">Resume Forge</span>
+        <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">v1</span>
+      </div>
+      <div class="text-sm text-slate-500">Build • Pick Template • Export PDF</div>
+    </div>
+  </header>
 
-  <hr>
+  <!-- Main layout -->
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Builder panel -->
+    <section id="builder" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 lg:sticky lg:top-20 self-start">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Resume Details</h2>
+        <button id="resetBtn" class="text-sm underline text-slate-500 hover:text-slate-700">Reset</button>
+      </div>
 
-  <h2>Generated Resume:</h2>
-  <div id="resume-output"></div>
+      <!-- Step Nav -->
+      <div class="flex flex-wrap gap-2 mb-5">
+        <button data-step="personal" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-indigo-600 text-white">Personal</button>
+        <button data-step="education" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Education</button>
+        <button data-step="experience" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Experience</button>
+        <button data-step="projects" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Projects</button>
+        <button data-step="skills" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Skills</button>
+        <button data-step="certs" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Certifications</button>
+        <button data-step="template" class="step-btn px-3 py-1.5 rounded-xl text-sm bg-slate-100">Templates</button>
+      </div>
 
-  <script src="script.js"></script>
+      <!-- Steps -->
+      <div class="space-y-6">
+        <!-- Personal -->
+        <div id="step-personal" class="step">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm">Full Name</label>
+              <input id="name" class="input" placeholder="e.g., Surya Pratap Singh" />
+            </div>
+            <div>
+              <label class="text-sm">Role / Title</label>
+              <input id="title" class="input" placeholder="e.g., Frontend Developer" />
+            </div>
+            <div>
+              <label class="text-sm">Email</label>
+              <input id="email" type="email" class="input" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label class="text-sm">Phone</label>
+              <input id="phone" class="input" placeholder="+91 9xxxxxxxxx" />
+            </div>
+            <div>
+              <label class="text-sm">Location</label>
+              <input id="location" class="input" placeholder="City, Country" />
+            </div>
+            <div>
+              <label class="text-sm">Website / Portfolio</label>
+              <input id="website" class="input" placeholder="https://" />
+            </div>
+            <div>
+              <label class="text-sm">LinkedIn</label>
+              <input id="linkedin" class="input" placeholder="https://linkedin.com/in/..." />
+            </div>
+            <div>
+              <label class="text-sm">GitHub</label>
+              <input id="github" class="input" placeholder="https://github.com/..." />
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-sm">Professional Summary</label>
+              <textarea id="summary" class="input h-28" placeholder="2–3 lines that summarise your skills, impact and goals."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Education -->
+        <div id="step-education" class="step hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">Education</h3>
+            <button id="addEducation" class="btn">+ Add</button>
+          </div>
+          <div id="educationList" class="space-y-4"></div>
+        </div>
+
+        <!-- Experience -->
+        <div id="step-experience" class="step hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">Experience</h3>
+            <button id="addExperience" class="btn">+ Add</button>
+          </div>
+          <div id="experienceList" class="space-y-4"></div>
+        </div>
+
+        <!-- Projects -->
+        <div id="step-projects" class="step hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">Projects</h3>
+            <button id="addProject" class="btn">+ Add</button>
+          </div>
+          <div id="projectsList" class="space-y-4"></div>
+        </div>
+
+        <!-- Skills -->
+        <div id="step-skills" class="step hidden">
+          <label class="text-sm">Skills (comma separated)</label>
+          <input id="skills" class="input" placeholder="React, Tailwind, Node, SQL" />
+          <p class="text-xs text-slate-500 mt-1">Tip: order by strength. You can also add proficiency in Projects/Experience bullets.</p>
+        </div>
+
+        <!-- Certifications -->
+        <div id="step-certs" class="step hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">Certifications</h3>
+            <button id="addCert" class="btn">+ Add</button>
+          </div>
+          <div id="certsList" class="space-y-4"></div>
+        </div>
+
+        <!-- Template selection -->
+        <div id="step-template" class="step hidden">
+          <h3 class="font-semibold mb-3">Choose a Template</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <label class="border rounded-xl p-3 cursor-pointer hover:ring-2 ring-indigo-500">
+              <input type="radio" name="template" value="modern" class="mr-2" checked />
+              <span class="font-medium">Modern</span>
+              <div class="mt-2 text-xs text-slate-500">Bold header, clean sections, accent color.</div>
+            </label>
+            <label class="border rounded-xl p-3 cursor-pointer hover:ring-2 ring-indigo-500">
+              <input type="radio" name="template" value="minimal" class="mr-2" />
+              <span class="font-medium">Minimal</span>
+              <div class="mt-2 text-xs text-slate-500">Classic typography, subtle separators.</div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button id="previewBtn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700">Generate Preview</button>
+        <button id="downloadBtn" disabled class="px-4 py-2 rounded-xl bg-slate-200 text-slate-600 font-semibold">Download PDF</button>
+        <button id="saveBtn" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50">Save Progress</button>
+      </div>
+    </section>
+
+    <!-- Preview panel -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold">Live Preview</h2>
+        <span class="text-sm text-slate-500">A4 scaled preview</span>
+      </div>
+      <div id="paperWrapper" class="mx-auto overflow-auto">
+        <div id="resumePaper" class="rounded-xl shadow-2xl border border-slate-200 p-8"></div>
+      </div>
+    </section>
+  </main>
+
+  <template id="educationFormTpl">
+    <div class="card">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm">Degree</label>
+          <input class="input edu-degree" placeholder="B.E. in ECE" />
+        </div>
+        <div>
+          <label class="text-sm">Institution</label>
+          <input class="input edu-school" placeholder="RNS Institute of Technology" />
+        </div>
+        <div>
+          <label class="text-sm">Location</label>
+          <input class="input edu-loc" placeholder="Bengaluru, IN" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">Start</label>
+            <input class="input edu-start" placeholder="2021" />
+          </div>
+          <div>
+            <label class="text-sm">End</label>
+            <input class="input edu-end" placeholder="2025" />
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm">Highlights (bullets, one per line)</label>
+          <textarea class="input edu-desc h-24" placeholder="CGPA: 9.1\nRelevant Coursework: DSP, Wireless, MIMO"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button class="text-sm text-rose-600 hover:underline remove-row">Remove</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="experienceFormTpl">
+    <div class="card">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm">Role</label>
+          <input class="input exp-role" placeholder="SDE Intern" />
+        </div>
+        <div>
+          <label class="text-sm">Company</label>
+          <input class="input exp-company" placeholder="ACME Corp" />
+        </div>
+        <div>
+          <label class="text-sm">Location</label>
+          <input class="input exp-loc" placeholder="Remote / City" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">Start</label>
+            <input class="input exp-start" placeholder="Jan 2024" />
+          </div>
+          <div>
+            <label class="text-sm">End</label>
+            <input class="input exp-end" placeholder="Jun 2024 / Present" />
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm">Impact (bullets, one per line)</label>
+          <textarea class="input exp-desc h-24" placeholder="Built X that improved Y by Z%\nOptimized ..."></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button class="text-sm text-rose-600 hover:underline remove-row">Remove</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="projectFormTpl">
+    <div class="card">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm">Project Name</label>
+          <input class="input prj-name" placeholder="Resume Builder" />
+        </div>
+        <div>
+          <label class="text-sm">Link (optional)</label>
+          <input class="input prj-link" placeholder="https://github.com/..." />
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm">Description (bullets, one per line)</label>
+          <textarea class="input prj-desc h-24" placeholder="Built with HTML/CSS/JS\nExports to PDF\nMultiple templates"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button class="text-sm text-rose-600 hover:underline remove-row">Remove</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="certFormTpl">
+    <div class="card">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="text-sm">Certification</label>
+          <input class="input cert-name" placeholder="AWS Cloud Practitioner" />
+        </div>
+        <div>
+          <label class="text-sm">Issuer</label>
+          <input class="input cert-issuer" placeholder="Amazon" />
+        </div>
+        <div>
+          <label class="text-sm">Year</label>
+          <input class="input cert-year" placeholder="2025" />
+        </div>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button class="text-sm text-rose-600 hover:underline remove-row">Remove</button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    // ---------- tiny UI helpers ----------
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    // Tailwind-like component shortcuts
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        .input{ @apply w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 placeholder-slate-400; }
+        .btn{ @apply px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm; }
+        .card{ @apply rounded-xl border border-slate-200 p-3 bg-white; }
+      </style>
+    `);
+
+    // ---------- Stepper ----------
+    $$('.step-btn').forEach(btn => btn.addEventListener('click', () => {
+      const step = btn.dataset.step;
+      $$('.step').forEach(s => s.classList.add('hidden'));
+      $('#step-' + step).classList.remove('hidden');
+      $$('.step-btn').forEach(b => b.classList.remove('bg-indigo-600','text-white'));
+      btn.classList.add('bg-indigo-600','text-white');
+    }));
+
+    // ---------- Dynamic rows ----------
+    function addRow(listId, tplId){
+      const list = $('#' + listId);
+      const tpl = document.getElementById(tplId);
+      const node = tpl.content.firstElementChild.cloneNode(true);
+      node.querySelector('.remove-row').addEventListener('click', () => node.remove());
+      list.appendChild(node);
+    }
+    $('#addEducation').addEventListener('click', ()=> addRow('educationList','educationFormTpl'));
+    $('#addExperience').addEventListener('click', ()=> addRow('experienceList','experienceFormTpl'));
+    $('#addProject').addEventListener('click', ()=> addRow('projectsList','projectFormTpl'));
+    $('#addCert').addEventListener('click', ()=> addRow('certsList','certFormTpl'));
+
+    // Add one starter row for each repeatable section
+    ['education','experience','project','cert'].forEach((k)=>{
+      const map = {education:['educationList','educationFormTpl'],experience:['experienceList','experienceFormTpl'],project:['projectsList','projectFormTpl'],cert:['certsList','certFormTpl']};
+      const [listId, tplId] = map[k];
+      addRow(listId, tplId);
+    });
+
+    // ---------- Data collection ----------
+    function getLines(v){ return v ? v.split(/\n+/).map(s=>s.trim()).filter(Boolean) : []; }
+
+    function collectData(){
+      const data = {
+        name: $('#name').value.trim(),
+        title: $('#title').value.trim(),
+        email: $('#email').value.trim(),
+        phone: $('#phone').value.trim(),
+        location: $('#location').value.trim(),
+        website: $('#website').value.trim(),
+        linkedin: $('#linkedin').value.trim(),
+        github: $('#github').value.trim(),
+        summary: $('#summary').value.trim(),
+        skills: ($('#skills').value||'').split(',').map(s=>s.trim()).filter(Boolean),
+        education: [],
+        experience: [],
+        projects: [],
+        certs: [],
+        template: document.querySelector('input[name="template"]:checked').value
+      };
+
+      // education
+      $$('#educationList .card').forEach(card => {
+        data.education.push({
+          degree: card.querySelector('.edu-degree').value.trim(),
+          school: card.querySelector('.edu-school').value.trim(),
+          loc: card.querySelector('.edu-loc').value.trim(),
+          start: card.querySelector('.edu-start').value.trim(),
+          end: card.querySelector('.edu-end').value.trim(),
+          bullets: getLines(card.querySelector('.edu-desc').value)
+        });
+      });
+      // experience
+      $$('#experienceList .card').forEach(card => {
+        data.experience.push({
+          role: card.querySelector('.exp-role').value.trim(),
+          company: card.querySelector('.exp-company').value.trim(),
+          loc: card.querySelector('.exp-loc').value.trim(),
+          start: card.querySelector('.exp-start').value.trim(),
+          end: card.querySelector('.exp-end').value.trim(),
+          bullets: getLines(card.querySelector('.exp-desc').value)
+        });
+      });
+      // projects
+      $$('#projectsList .card').forEach(card => {
+        data.projects.push({
+          name: card.querySelector('.prj-name').value.trim(),
+          link: card.querySelector('.prj-link').value.trim(),
+          bullets: getLines(card.querySelector('.prj-desc').value)
+        });
+      });
+      // certs
+      $$('#certsList .card').forEach(card => {
+        data.certs.push({
+          name: card.querySelector('.cert-name').value.trim(),
+          issuer: card.querySelector('.cert-issuer').value.trim(),
+          year: card.querySelector('.cert-year').value.trim()
+        });
+      });
+      return data;
+    }
+
+    // ---------- Save / Load ----------
+    function save(){ localStorage.setItem('resumeForge:data', JSON.stringify(collectData())); }
+    function load(){ try { return JSON.parse(localStorage.getItem('resumeForge:data')||'{}'); } catch(e){ return {}; } }
+
+    $('#saveBtn').addEventListener('click', ()=>{ save(); alert('Saved locally on this device.'); });
+    $('#resetBtn').addEventListener('click', ()=>{ if(confirm('Clear all fields?')){ localStorage.removeItem('resumeForge:data'); location.reload(); }});
+
+    // ---------- Rendering (Templates) ----------
+    function renderPreview(){
+      const d = collectData();
+      const el = $('#resumePaper');
+      el.innerHTML = (d.template === 'minimal') ? tplMinimal(d) : tplModern(d);
+      // enable download button only when name present
+      $('#downloadBtn').disabled = !d.name;
+      // scale preview to fit container nicely on large screens
+      fitPreviewScale();
+    }
+
+    function sectionHeading(label){
+      return `<div class="mt-5 mb-2 flex items-center gap-2"><div class="w-1.5 h-5 bg-slate-800 rounded"></div><h3 class="text-sm tracking-wide uppercase font-bold">${label}</h3></div>`;
+    }
+
+    function bullets(list){
+      if(!list || !list.length) return '';
+      return `<ul class="list-disc pl-5 leading-relaxed">${list.map(li=>`<li>${escapeHtml(li)}</li>`).join('')}</ul>`;
+    }
+
+    function tagChips(list){
+      if(!list || !list.length) return '';
+      return `<div class="flex flex-wrap gap-1">${list.map(t=>`<span class="px-2 py-1 rounded-lg border text-xs">${escapeHtml(t)}</span>`).join('')}</div>`;
+    }
+
+    function headerContacts(d){
+      const bits = [];
+      if(d.email) bits.push(d.email);
+      if(d.phone) bits.push(d.phone);
+      if(d.location) bits.push(d.location);
+      if(d.linkedin) bits.push(`<a href="${d.linkedin}" class="underline" target="_blank">LinkedIn</a>`);
+      if(d.github) bits.push(`<a href="${d.github}" class="underline" target="_blank">GitHub</a>`);
+      if(d.website) bits.push(`<a href="${d.website}" class="underline" target="_blank">Website</a>`);
+      return bits.join(' • ');
+    }
+
+    function tplModern(d){
+      return `
+      <div class="h-full">
+        <div class="-m-8 p-8 pb-6 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-t-xl">
+          <h1 class="text-3xl font-extrabold">${escapeHtml(d.name || 'Your Name')}</h1>
+          <p class="opacity-90">${escapeHtml(d.title || '')}</p>
+          <p class="mt-2 text-sm opacity-90">${headerContacts(d)}</p>
+        </div>
+        <div class="pt-4">
+          ${d.summary ? `<p class="leading-relaxed">${escapeHtml(d.summary)}</p>` : ''}
+
+          ${d.education?.length ? sectionHeading('Education') + d.education.map(ed=>`
+            <div class="mt-1">
+              <div class="flex items-center justify-between text-sm font-semibold">
+                <div>${escapeHtml(ed.degree)} — ${escapeHtml(ed.school)}</div>
+                <div class="text-slate-500">${escapeHtml(ed.start)} – ${escapeHtml(ed.end)}</div>
+              </div>
+              <div class="text-xs text-slate-500">${escapeHtml(ed.loc)}</div>
+              ${bullets(ed.bullets)}
+            </div>
+          `).join('') : ''}
+
+          ${d.experience?.length ? sectionHeading('Experience') + d.experience.map(ex=>`
+            <div class="mt-1">
+              <div class="flex items-center justify-between text-sm font-semibold">
+                <div>${escapeHtml(ex.role)} — ${escapeHtml(ex.company)}</div>
+                <div class="text-slate-500">${escapeHtml(ex.start)} – ${escapeHtml(ex.end)}</div>
+              </div>
+              <div class="text-xs text-slate-500">${escapeHtml(ex.loc)}</div>
+              ${bullets(ex.bullets)}
+            </div>
+          `).join('') : ''}
+
+          ${d.projects?.length ? sectionHeading('Projects') + d.projects.map(p=>`
+            <div class="mt-1">
+              <div class="flex items-center justify-between text-sm font-semibold">
+                <div>${escapeHtml(p.name)}</div>
+                <div class="text-slate-500">${p.link ? `<a class="underline" target="_blank" href="${p.link}">Link</a>` : ''}</div>
+              </div>
+              ${bullets(p.bullets)}
+            </div>
+          `).join('') : ''}
+
+          ${d.skills?.length ? sectionHeading('Skills') + tagChips(d.skills) : ''}
+
+          ${d.certs?.length ? sectionHeading('Certifications') + `<ul class="list-disc pl-5">${d.certs.map(c=>`<li>${escapeHtml(c.name)}${c.issuer?` — ${escapeHtml(c.issuer)}`:''}${c.year?` (${escapeHtml(c.year)})`:''}</li>`).join('')}</ul>` : ''}
+        </div>
+      </div>`;
+    }
+
+    function tplMinimal(d){
+      return `
+      <div class="h-full">
+        <div class="text-center border-b pb-2">
+          <h1 class="text-2xl font-extrabold tracking-tight">${escapeHtml(d.name || 'Your Name')}</h1>
+          <div class="text-sm text-slate-600">${escapeHtml(d.title || '')}</div>
+          <div class="text-xs mt-1">${headerContacts(d)}</div>
+        </div>
+        <div class="pt-4">
+          ${d.summary ? `<p class="leading-relaxed">${escapeHtml(d.summary)}</p>` : ''}
+          ${d.experience?.length ? `<h3 class="section-title font-bold mt-4">Experience</h3>` + d.experience.map(ex=>`
+            <div class="mt-1">
+              <div class="text-sm font-semibold">${escapeHtml(ex.role)} — ${escapeHtml(ex.company)} <span class="text-slate-500">(${escapeHtml(ex.start)} – ${escapeHtml(ex.end)})</span></div>
+              <div class="text-xs text-slate-500">${escapeHtml(ex.loc)}</div>
+              ${bullets(ex.bullets)}
+            </div>`).join('') : ''}
+          ${d.education?.length ? `<h3 class="section-title font-bold mt-4">Education</h3>` + d.education.map(ed=>`
+            <div class="mt-1">
+              <div class="text-sm font-semibold">${escapeHtml(ed.degree)} — ${escapeHtml(ed.school)} <span class="text-slate-500">(${escapeHtml(ed.start)} – ${escapeHtml(ed.end)})</span></div>
+              <div class="text-xs text-slate-500">${escapeHtml(ed.loc)}</div>
+              ${bullets(ed.bullets)}
+            </div>`).join('') : ''}
+          ${d.projects?.length ? `<h3 class="section-title font-bold mt-4">Projects</h3>` + d.projects.map(p=>`
+            <div class="mt-1">
+              <div class="text-sm font-semibold">${escapeHtml(p.name)} ${p.link?`<a class=\"underline text-slate-600\" target=\"_blank\" href=\"${p.link}\">(link)</a>`:''}</div>
+              ${bullets(p.bullets)}
+            </div>`).join('') : ''}
+          ${d.skills?.length ? `<h3 class="section-title font-bold mt-4">Skills</h3>` + tagChips(d.skills) : ''}
+          ${d.certs?.length ? `<h3 class="section-title font-bold mt-4">Certifications</h3><ul class="list-disc pl-5">${d.certs.map(c=>`<li>${escapeHtml(c.name)}${c.issuer?` — ${escapeHtml(c.issuer)}`:''}${c.year?` (${escapeHtml(c.year)})`:''}</li>`).join('')}</ul>` : ''}
+        </div>
+      </div>`;
+    }
+
+    function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m])); }
+
+    // ---------- Preview scaling ----------
+    function fitPreviewScale(){
+      const paper = $('#resumePaper');
+      const wrapper = $('#paperWrapper');
+      paper.style.transform = 'scale(1)';
+      const pad = 24; // some breathing space
+      const w = wrapper.clientWidth - pad;
+      const target = 794; // px width approx for 210mm at 96dpi
+      const scale = Math.min(1, w / target);
+      paper.style.transform = `scale(${scale})`;
+      paper.style.transformOrigin = 'top left';
+    }
+    window.addEventListener('resize', fitPreviewScale);
+
+    // ---------- Buttons ----------
+    $('#previewBtn').addEventListener('click', renderPreview);
+    $('#downloadBtn').addEventListener('click', () => {
+      const opt = {
+        margin: [10,10,10,10],
+        filename: 'resume.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(document.getElementById('resumePaper')).save();
+    });
+
+    // Auto-save on input changes (debounced)
+    let t; document.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(save, 400);});
+
+    // Initial render
+    fitPreviewScale();
+    renderPreview();
+  </script>
 </body>
 </html>
