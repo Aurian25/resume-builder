@@ -6,70 +6,90 @@
   <title>Resume Builder</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <style>
+    /* Glassmorphism + Neumorphism */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 8px 8px 16px rgba(0,0,0,0.2),
+                  -8px -8px 16px rgba(255,255,255,0.1);
+    }
+    .btn-3d {
+      transition: all 0.2s ease;
+      transform: translateY(0px);
+      box-shadow: 0 6px 0px rgba(0,0,0,0.2);
+    }
+    .btn-3d:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-gray-100 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-6 shadow-lg">
-    <h1 class="text-3xl font-bold text-center">🚀 Resume Builder</h1>
-    <p class="text-center text-sm opacity-90">Build and download your resume instantly</p>
+  <header class="glass mx-6 mt-6 py-4 text-center text-white">
+    <h1 class="text-4xl font-extrabold tracking-tight">🚀 Resume Builder</h1>
+    <p class="text-sm opacity-80">Build, Preview & Download in Style</p>
   </header>
 
-  <main class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+  <main class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 max-w-7xl mx-auto">
     <!-- Form -->
-    <section class="bg-white rounded-xl p-6 shadow-lg">
-      <h2 class="text-xl font-bold mb-4">Fill Your Details</h2>
+    <section class="glass p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Your Details</h2>
+        <button onclick="toggleDarkMode()" class="btn-3d px-3 py-1 rounded bg-gradient-to-r from-indigo-500 to-purple-600 text-white">🌗</button>
+      </div>
 
-      <label class="block mb-2">Full Name
-        <input id="name" class="w-full border p-2 rounded" placeholder="Your name" />
-      </label>
-      <label class="block mb-2">Email
-        <input id="email" type="email" class="w-full border p-2 rounded" placeholder="you@email.com" />
-      </label>
-      <label class="block mb-2">Phone
-        <input id="phone" class="w-full border p-2 rounded" placeholder="123-456-7890" />
-      </label>
-      <label class="block mb-2">Education
-        <textarea id="education" class="w-full border p-2 rounded" placeholder="Your education details"></textarea>
-      </label>
-      <label class="block mb-2">Experience
-        <textarea id="experience" class="w-full border p-2 rounded" placeholder="Your work experience"></textarea>
-      </label>
-      <label class="block mb-2">Skills
-        <textarea id="skills" class="w-full border p-2 rounded" placeholder="Skill1, Skill2, Skill3"></textarea>
-      </label>
-      <label class="block mb-2">Projects
-        <textarea id="projects" class="w-full border p-2 rounded" placeholder="Your projects"></textarea>
-      </label>
-      <label class="block mb-2">Certifications
-        <textarea id="certifications" class="w-full border p-2 rounded" placeholder="Your certifications"></textarea>
-      </label>
+      <div class="space-y-3">
+        <input id="name" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Full Name" />
+        <input id="email" type="email" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Email" />
+        <input id="phone" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Phone" />
+        <textarea id="education" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Education"></textarea>
+        <textarea id="experience" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Experience"></textarea>
+        <textarea id="skills" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Skills (comma separated)"></textarea>
+        <textarea id="projects" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Projects"></textarea>
+        <textarea id="certifications" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Certifications"></textarea>
 
-      <div class="mt-4">
-        <label class="block mb-2">Choose Template</label>
-        <select id="template" class="w-full border p-2 rounded">
+        <select id="template" class="w-full p-2 rounded glass text-black dark:text-white">
           <option value="modern">Modern</option>
           <option value="minimal">Minimal</option>
-          <option value="professional">Professional (Two-column)</option>
+          <option value="professional">Professional</option>
         </select>
       </div>
 
-      <div class="flex gap-2 mt-4">
-        <button onclick="generateResume()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Generate Preview</button>
-        <button onclick="downloadPDF()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download PDF</button>
+      <div class="flex gap-3 mt-6">
+        <button onclick="generateResume()" class="btn-3d flex-1 py-2 rounded bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold">⚡ Preview</button>
+        <button onclick="downloadPDF()" class="btn-3d flex-1 py-2 rounded bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold">⬇ Download</button>
       </div>
     </section>
 
     <!-- Preview -->
-    <section class="bg-white rounded-xl p-6 shadow-lg">
-      <h2 class="text-xl font-bold mb-4">Resume Preview</h2>
-      <div id="resume-preview" class="border rounded p-4 min-h-[500px]">
+    <section class="glass p-6 overflow-auto">
+      <h2 class="text-xl font-bold mb-4">Live Preview</h2>
+      <div id="resume-preview" class="p-4 rounded bg-white text-black min-h-[500px] transition-all duration-500 ease-in-out">
         <p class="text-gray-400">Your resume will appear here...</p>
       </div>
     </section>
   </main>
 
+  <footer class="text-center text-sm text-gray-400 py-4">
+    Made with ❤️ for Developers
+  </footer>
+
   <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
     function generateResume() {
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
@@ -83,30 +103,22 @@
 
       let html = "";
 
-      // Modern Template
       if (template === "modern") {
         html = `
-          <div class="p-6 border-l-4 border-indigo-600">
+          <div class="p-6 border-l-4 border-indigo-600 space-y-3 animate-fadeIn">
             <h1 class="text-2xl font-bold">${name}</h1>
             <p class="text-sm">${email} | ${phone}</p>
-            <h2 class="mt-4 font-semibold">Education</h2>
-            <p>${education}</p>
-            <h2 class="mt-2 font-semibold">Experience</h2>
-            <p>${experience}</p>
+            <h2 class="mt-4 font-semibold">Education</h2><p>${education}</p>
+            <h2 class="mt-2 font-semibold">Experience</h2><p>${experience}</p>
             <h2 class="mt-2 font-semibold">Skills</h2>
             <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
-            <h2 class="mt-2 font-semibold">Projects</h2>
-            <p>${projects}</p>
-            <h2 class="mt-2 font-semibold">Certifications</h2>
-            <p>${certifications}</p>
+            <h2 class="mt-2 font-semibold">Projects</h2><p>${projects}</p>
+            <h2 class="mt-2 font-semibold">Certifications</h2><p>${certifications}</p>
           </div>
         `;
-      }
-
-      // Minimal Template
-      else if (template === "minimal") {
+      } else if (template === "minimal") {
         html = `
-          <div class="p-6">
+          <div class="p-6 animate-fadeIn">
             <h1 class="text-xl font-bold">${name}</h1>
             <p>${email} | ${phone}</p>
             <p><strong>Education:</strong> ${education}</p>
@@ -116,30 +128,21 @@
             <p><strong>Certifications:</strong> ${certifications}</p>
           </div>
         `;
-      }
-
-      // Professional (Two-column)
-      else if (template === "professional") {
+      } else if (template === "professional") {
         html = `
-          <div class="grid grid-cols-3 gap-4 p-6">
-            <!-- Sidebar -->
+          <div class="grid grid-cols-3 gap-4 p-6 animate-fadeIn">
             <aside class="col-span-1 bg-gray-100 p-4 rounded">
               <h2 class="font-bold text-lg">${name}</h2>
               <p class="text-sm">${email}</p>
               <p class="text-sm">${phone}</p>
               <h3 class="mt-4 font-semibold">Skills</h3>
               <ul class="list-disc ml-4">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
-              <h3 class="mt-4 font-semibold">Certifications</h3>
-              <p>${certifications}</p>
+              <h3 class="mt-4 font-semibold">Certifications</h3><p>${certifications}</p>
             </aside>
-            <!-- Main -->
             <main class="col-span-2">
-              <h3 class="font-semibold text-lg">Education</h3>
-              <p>${education}</p>
-              <h3 class="mt-4 font-semibold text-lg">Experience</h3>
-              <p>${experience}</p>
-              <h3 class="mt-4 font-semibold text-lg">Projects</h3>
-              <p>${projects}</p>
+              <h3 class="font-semibold text-lg">Education</h3><p>${education}</p>
+              <h3 class="mt-4 font-semibold text-lg">Experience</h3><p>${experience}</p>
+              <h3 class="mt-4 font-semibold text-lg">Projects</h3><p>${projects}</p>
             </main>
           </div>
         `;
