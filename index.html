@@ -180,7 +180,48 @@
       let html = "";
       switch (template) {
         case "standard": html = `<div class="p-6 font-sans">${headerSection}${mainContent}</div>`; break;
-        case "two-column": html = `<div class="grid grid-cols-3 gap-6 font-sans">${headerSection}${mainContent}</div>`; break;
+        case "two-column":
+  html = `
+    <div class="grid grid-cols-3 gap-6 font-sans p-6">
+      <!-- Left Sidebar -->
+      <div class="col-span-1 space-y-4">
+        ${photoHTML}
+        <h1 class="text-xl font-bold">${name}</h1>
+        <p class="text-sm">${email}</p>
+        <p class="text-sm">${phone}</p>
+        ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
+        ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
+        ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
+        ${about ? `<div><h2 class="font-semibold text-lg mt-4">About Me</h2><p>${about}</p></div>` : ""}
+        <div>
+          <h2 class="font-semibold text-lg mt-4">Skills</h2>
+          <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
+        </div>
+      </div>
+
+      <!-- Right Main Content -->
+      <div class="col-span-2 space-y-4">
+        <div>
+          <h2 class="font-semibold text-lg">Education</h2>
+          <p>${education}</p>
+        </div>
+        <div>
+          <h2 class="font-semibold text-lg">Experience</h2>
+          <p>${experience}</p>
+        </div>
+        <div>
+          <h2 class="font-semibold text-lg">Projects</h2>
+          <p>${projects}</p>
+        </div>
+        <div>
+          <h2 class="font-semibold text-lg">Certifications</h2>
+          <p>${certifications}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  break;
+
         case "executive": html = `<div class="p-6 font-serif">${headerSection}${mainContent}</div>`; break;
         case "minimal": html = `<div class="p-6 font-light tracking-wide">${headerSection}${mainContent}</div>`; break;
         case "classic": html = `<div style="font-family: Times New Roman; padding: 20px;">${headerSection}${mainContent}</div>`; break;
