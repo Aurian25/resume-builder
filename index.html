@@ -117,128 +117,135 @@
   </footer>
 
   <script>
-    function toggleDarkMode() {
-      document.documentElement.classList.toggle('dark');
+  function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+  }
+
+  function generateResume() {
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const github = document.getElementById("github").value;
+    const linkedin = document.getElementById("linkedin").value;
+    const address = document.getElementById("address").value;
+    const about = document.getElementById("about").value;
+
+    // Convert inputs into arrays (newline separated)
+    const educationList = document.getElementById("education").value.split("\n").filter(e => e.trim() !== "");
+    const experienceList = document.getElementById("experience").value.split("\n").filter(e => e.trim() !== "");
+    const skills = document.getElementById("skills").value.split(",").filter(s => s.trim() !== "");
+    const projectsList = document.getElementById("projects").value.split("\n").filter(p => p.trim() !== "");
+    const certificationsList = document.getElementById("certifications").value.split("\n").filter(c => c.trim() !== "");
+    const template = document.getElementById("template").value;
+
+    const photoInput = document.getElementById("photo");
+    let photoHTML = "";
+    if (photoInput.files && photoInput.files[0]) {
+      const imgURL = URL.createObjectURL(photoInput.files[0]);
+      photoHTML = `<div class="w-28 h-28 rounded-full overflow-hidden border-2 border-gray-400">
+                     <img src="${imgURL}" alt="Profile Photo" class="object-cover w-full h-full" />
+                   </div>`;
     }
 
-    function generateResume() {
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const phone = document.getElementById("phone").value;
-      const github = document.getElementById("github").value;
-      const linkedin = document.getElementById("linkedin").value;
-      const address = document.getElementById("address").value;
-      const about = document.getElementById("about").value;
-      const education = document.getElementById("education").value;
-      const experience = document.getElementById("experience").value;
-      const skills = document.getElementById("skills").value.split(",");
-      const projects = document.getElementById("projects").value;
-      const certifications = document.getElementById("certifications").value;
-      const template = document.getElementById("template").value;
-
-      const photoInput = document.getElementById("photo");
-      let photoHTML = "";
-      if (photoInput.files && photoInput.files[0]) {
-        const imgURL = URL.createObjectURL(photoInput.files[0]);
-        photoHTML = `<div class="w-28 h-28 rounded-full overflow-hidden border-2 border-gray-400">
-                       <img src="${imgURL}" alt="Profile Photo" class="object-cover w-full h-full" />
-                     </div>`;
-      }
-
-      const headerSection = `
-        <div class="flex items-center space-x-6">
-          ${photoHTML}
-          <div>
-            <h1 class="text-2xl font-bold">${name}</h1>
-            <p class="text-sm">${email} | ${phone}</p>
-            ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
-            ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
-            ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
-          </div>
-        </div>
-        <hr class="my-3">
-      `;
-
-      const aboutSection = about ? `
-        <section>
-          <h2 class="font-semibold text-lg">About Me</h2>
-          <p>${about}</p>
-        </section>
-        <hr class="my-3">
-      ` : "";
-
-      const mainContent = `
-        ${aboutSection}
-        <h2 class="font-semibold text-lg">Education</h2><p>${education}</p>
-        <h2 class="font-semibold text-lg mt-3">Experience</h2><p>${experience}</p>
-        <h2 class="font-semibold text-lg mt-3">Skills</h2>
-        <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
-        <h2 class="font-semibold text-lg mt-3">Projects</h2><p>${projects}</p>
-        <h2 class="font-semibold text-lg mt-3">Certifications</h2><p>${certifications}</p>
-      `;
-
-      let html = "";
-      switch (template) {
-        case "standard": html = `<div class="p-6 font-sans">${headerSection}${mainContent}</div>`; break;
-        case "two-column":
-  html = `
-    <div class="grid grid-cols-3 gap-6 font-sans p-6">
-      <!-- Left Sidebar -->
-      <div class="col-span-1 space-y-4">
+    const headerSection = `
+      <div class="flex items-center space-x-6">
         ${photoHTML}
-        <h1 class="text-xl font-bold">${name}</h1>
-        <p class="text-sm">${email}</p>
-        <p class="text-sm">${phone}</p>
-        ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
-        ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
-        ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
-        ${about ? `<div><h2 class="font-semibold text-lg mt-4">About Me</h2><p>${about}</p></div>` : ""}
         <div>
-          <h2 class="font-semibold text-lg mt-4">Skills</h2>
-          <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
+          <h1 class="text-2xl font-bold">${name}</h1>
+          <p class="text-sm">${email} | ${phone}</p>
+          ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
+          ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
+          ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
         </div>
       </div>
+      <hr class="my-3">
+    `;
 
-      <!-- Right Main Content -->
-      <div class="col-span-2 space-y-4">
-        <div>
-          <h2 class="font-semibold text-lg">Education</h2>
-          <p>${education}</p>
-        </div>
-        <div>
-          <h2 class="font-semibold text-lg">Experience</h2>
-          <p>${experience}</p>
-        </div>
-        <div>
-          <h2 class="font-semibold text-lg">Projects</h2>
-          <p>${projects}</p>
-        </div>
-        <div>
-          <h2 class="font-semibold text-lg">Certifications</h2>
-          <p>${certifications}</p>
-        </div>
-      </div>
-    </div>
-  `;
-  break;
+    const aboutSection = about ? `
+      <section>
+        <h2 class="font-semibold text-lg">About Me</h2>
+        <p>${about}</p>
+      </section>
+      <hr class="my-3">
+    ` : "";
 
-        case "executive": html = `<div class="p-6 font-serif">${headerSection}${mainContent}</div>`; break;
-        case "minimal": html = `<div class="p-6 font-light tracking-wide">${headerSection}${mainContent}</div>`; break;
-        case "classic": html = `<div style="font-family: Times New Roman; padding: 20px;">${headerSection}${mainContent}</div>`; break;
-        case "creative": html = `<div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg rounded-lg">${headerSection}${mainContent}</div>`; break;
-        case "sidebar": html = `<div class="grid grid-cols-3 font-sans">${headerSection}${mainContent}</div>`; break;
-        case "compact": html = `<div class="text-sm p-4 leading-tight">${headerSection}${mainContent}</div>`; break;
-        case "infographic": html = `<div class="p-6">${headerSection}${mainContent}</div>`; break;
-        case "student": html = `<div class="p-6 font-sans">${headerSection}${mainContent}</div>`; break;
-      }
+    const mainContent = `
+      ${aboutSection}
+      <h2 class="font-semibold text-lg">Education</h2>
+      <ul class="list-disc ml-6">${educationList.map(e => `<li>${e}</li>`).join("")}</ul>
+      <h2 class="font-semibold text-lg mt-3">Experience</h2>
+      <ul class="list-disc ml-6">${experienceList.map(e => `<li>${e}</li>`).join("")}</ul>
+      <h2 class="font-semibold text-lg mt-3">Skills</h2>
+      <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
+      <h2 class="font-semibold text-lg mt-3">Projects</h2>
+      <ul class="list-disc ml-6">${projectsList.map(p => `<li>${p}</li>`).join("")}</ul>
+      <h2 class="font-semibold text-lg mt-3">Certifications</h2>
+      <ul class="list-disc ml-6">${certificationsList.map(c => `<li>${c}</li>`).join("")}</ul>
+    `;
 
-      document.getElementById("resume-preview").innerHTML = html;
+    let html = "";
+    switch (template) {
+      case "standard": 
+        html = `<div class="p-6 font-sans">${headerSection}${mainContent}</div>`; 
+        break;
+      case "two-column":
+        html = `
+          <div class="grid grid-cols-3 gap-6 font-sans p-6">
+            <!-- Left Sidebar -->
+            <div class="col-span-1 space-y-4">
+              ${photoHTML}
+              <h1 class="text-xl font-bold">${name}</h1>
+              <p class="text-sm">${email}</p>
+              <p class="text-sm">${phone}</p>
+              ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
+              ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
+              ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
+              ${about ? `<div><h2 class="font-semibold text-lg mt-4">About Me</h2><p>${about}</p></div>` : ""}
+              <div>
+                <h2 class="font-semibold text-lg mt-4">Skills</h2>
+                <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
+              </div>
+            </div>
+            <!-- Right Main Content -->
+            <div class="col-span-2 space-y-4">
+              <div>
+                <h2 class="font-semibold text-lg">Education</h2>
+                <ul class="list-disc ml-6">${educationList.map(e => `<li>${e}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <h2 class="font-semibold text-lg">Experience</h2>
+                <ul class="list-disc ml-6">${experienceList.map(e => `<li>${e}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <h2 class="font-semibold text-lg">Projects</h2>
+                <ul class="list-disc ml-6">${projectsList.map(p => `<li>${p}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <h2 class="font-semibold text-lg">Certifications</h2>
+                <ul class="list-disc ml-6">${certificationsList.map(c => `<li>${c}</li>`).join("")}</ul>
+              </div>
+            </div>
+          </div>
+        `;
+        break;
+      case "executive": html = `<div class="p-6 font-serif">${headerSection}${mainContent}</div>`; break;
+      case "minimal": html = `<div class="p-6 font-light tracking-wide">${headerSection}${mainContent}</div>`; break;
+      case "classic": html = `<div style="font-family: Times New Roman; padding: 20px;">${headerSection}${mainContent}</div>`; break;
+      case "creative": html = `<div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg rounded-lg">${headerSection}${mainContent}</div>`; break;
+      case "sidebar": html = `<div class="grid grid-cols-3 font-sans">${headerSection}${mainContent}</div>`; break;
+      case "compact": html = `<div class="text-sm p-4 leading-tight">${headerSection}${mainContent}</div>`; break;
+      case "infographic": html = `<div class="p-6">${headerSection}${mainContent}</div>`; break;
+      case "student": html = `<div class="p-6 font-sans">${headerSection}${mainContent}</div>`; break;
     }
 
-    function downloadPDF() {
-      const element = document.getElementById("resume-preview");
-      html2pdf().from(element).save("resume.pdf");
-    }
-  </script>
+    document.getElementById("resume-preview").innerHTML = html;
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById("resume-preview");
+    html2pdf().from(element).save("resume.pdf");
+  }
+</script>
+
 </body>
 </html>
