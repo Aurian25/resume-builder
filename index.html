@@ -50,14 +50,20 @@
       </div>
 
       <div class="space-y-3">
-        <input id="name" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Full Name" />
-        <input id="email" type="email" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Email" />
-        <input id="phone" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Phone" />
-        <textarea id="education" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Education"></textarea>
-        <textarea id="experience" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Experience"></textarea>
-        <textarea id="skills" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Skills (comma separated)"></textarea>
-        <textarea id="projects" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Projects"></textarea>
-        <textarea id="certifications" class="w-full p-2 rounded glass text-black dark:text-white" placeholder="Certifications"></textarea>
+        <input type="text" id="name" placeholder="Full Name" />
+        <input type="email" id="email" placeholder="Email" />
+        <input type="text" id="phone" placeholder="Phone Number" />
+        <input type="text" id="github" placeholder="GitHub Profile Link" />
+        <input type="text" id="linkedin" placeholder="LinkedIn Profile Link" />
+        <input type="text" id="address" placeholder="Address" />
+        <textarea id="about" placeholder="About Me"></textarea>
+        <input type="file" id="photo" accept="image/*" />
+
+        <textarea id="education" placeholder="Education"></textarea>
+        <textarea id="experience" placeholder="Experience"></textarea>
+        <textarea id="skills" placeholder="Skills (comma separated)"></textarea>
+        <textarea id="projects" placeholder="Projects"></textarea>
+        <textarea id="certifications" placeholder="Certifications"></textarea>
 
         <select id="template" class="w-full p-2 rounded glass text-black dark:text-white">
           <option value="standard">Standard ATS</option>
@@ -102,14 +108,57 @@
   const name = document.getElementById("name").value;
   const email = document.getElementById("email").value;
   const phone = document.getElementById("phone").value;
+  const github = document.getElementById("github").value;
+  const linkedin = document.getElementById("linkedin").value;
+  const address = document.getElementById("address").value;
+  const about = document.getElementById("about").value;
   const education = document.getElementById("education").value;
   const experience = document.getElementById("experience").value;
   const skills = document.getElementById("skills").value.split(",");
   const projects = document.getElementById("projects").value;
   const certifications = document.getElementById("certifications").value;
-  const template = document.getElementById("template").value;
 
-  let html = "";
+  const photoInput = document.getElementById("photo");
+  let photoHTML = "";
+
+  if (photoInput.files && photoInput.files[0]) {
+    const imgURL = URL.createObjectURL(photoInput.files[0]);
+    photoHTML = `<div class="w-28 h-28 rounded-full overflow-hidden border-2 border-gray-400">
+                   <img src="${imgURL}" alt="Profile Photo" class="object-cover w-full h-full" />
+                 </div>`;
+  }
+
+  const headerSection = `
+    <div class="flex items-center space-x-6">
+      ${photoHTML}
+      <div>
+        <h1 class="text-2xl font-bold">${name}</h1>
+        <p class="text-sm">${email} | ${phone}</p>
+        ${github ? `<p class="text-sm">GitHub: <a href="${github}" class="text-blue-600">${github}</a></p>` : ""}
+        ${linkedin ? `<p class="text-sm">LinkedIn: <a href="${linkedin}" class="text-blue-600">${linkedin}</a></p>` : ""}
+        ${address ? `<p class="text-sm">Address: ${address}</p>` : ""}
+      </div>
+    </div>
+    <hr class="my-3">
+  `;
+
+  const aboutSection = about ? `
+    <section>
+      <h2 class="font-semibold text-lg">About Me</h2>
+      <p>${about}</p>
+    </section>
+    <hr class="my-3">
+  ` : "";
+
+  const mainContent = `
+    ${aboutSection}
+    <h2 class="font-semibold text-lg">Education</h2><p>${education}</p>
+    <h2 class="font-semibold text-lg mt-3">Experience</h2><p>${experience}</p>
+    <h2 class="font-semibold text-lg mt-3">Skills</h2>
+    <ul class="list-disc ml-6">${skills.map(s => `<li>${s.trim()}</li>`).join("")}</ul>
+    <h2 class="font-semibold text-lg mt-3">Projects</h2><p>${projects}</p>
+    <h2 class="font-semibold text-lg mt-3">Certifications</h2><p>${certifications}</p>
+  `;
 
   switch (template) {
     // 1. Standard ATS
@@ -291,7 +340,12 @@
       break;
   }
 
-  document.getElementById("resume-preview").innerHTML = html;
+  document.getElementById("resume-preview").innerHTML = `
+    <div class="p-6 font-sans">
+      ${headerSection}
+      ${mainContent}
+    </div>
+  `;
 }
 
     function downloadPDF() {
